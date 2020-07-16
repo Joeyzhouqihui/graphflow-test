@@ -10,7 +10,7 @@ from clause_generator import *
 '''
 
 #要导入的图数据
-dir = 'dat/'
+dir = '/data/share/users/legend/project/query-generator/WukongSLarge/base_edges.txt'
 
 #生成要load的图，需要的一些预处理的命令
 preprocess_commands = 'command/preprocess.txt'
@@ -153,6 +153,7 @@ def exec(command_file, batch = 1000):# 1000句一起执行
     file.close()
 
 if __name__ == '__main__' :
+    '''
     parse_types()
     preprocess_file = open(preprocess_commands, 'w', encoding='utf-8')
     insert_file = open(insert_commands, 'w', encoding='utf-8')
@@ -169,4 +170,13 @@ if __name__ == '__main__' :
     insert_file.close()
 
     exec(preprocess_commands)
+    '''
+
+    with open(dir, 'r', encoding='utf-8') as file:
+        line = file.readline()
+        print(line)
+        file.close()
+    
+
+
 
