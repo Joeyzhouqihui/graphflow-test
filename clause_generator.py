@@ -6,6 +6,9 @@ class Clause_generator():
         self.edge_clause = "-[:{0} {1}]->"
         self.edge_clause_without_prop = "-[:{0}]->"
         self.end_clause = ";"
+        self.continuous_match_clause = "Continuously match"
+        self.sep_clause = ","
+        self.tmp = None
 
     #传入一个字典，然后构建properties
     def construct_prop(self, dic):
@@ -60,21 +63,26 @@ class Clause_generator():
         edge = self.construct_edge(from_id, from_type, edge_type, to_id, to_type, from_prop, edge_prop, to_prop)
         return self.create_clause + ' ' + edge + self.end_clause
 
-    def create_edges(self,
-                     from_ids, from_types,
-                     edge_types,
-                     to_ids, to_types,
-                     from_props = None, edge_props = None, to_props = None):
-        len = len(from_ids)
-        edges = []
-        for i in range(len):
-            edge = self.construct_edge(from_ids[i], from_types[i],
-                                       edge_types[i],
-                                       to_ids[i], to_types[i],
-                                       from_props[i], edge_props[i], to_props[i])
-            edges.append(edge)
-        return self.create_clause + ' ' + ','.join(edges) + self.end_clause
+    def add_match_edge(self,
+                        from_var, from_type,
+                        edge_type,
+                        to_var, to_type):
+        edge = self.construct_edge(from_var, from_type, edge_type, to_var, to_type)
+        if self.tmp is None:
+            self.tmp = edge
+        else:
+            self.tmp = self.tmp + self.sep_clause + edge
 
-    def create_edges(self, edges):
-        pass
+    def create_continuous_edge(self):
+        return_clause = self.continuous_match_clause + ' ' + self.tmp + self.end_clause
+        self.tmp = None
+        return return_clause
 
+class Variable_generator():
+    def __init__(self):
+        self.count = 0
+
+    def get_variable(self):
+        re = 'n' + str(self.count)
+        self.count += 1
+        return re

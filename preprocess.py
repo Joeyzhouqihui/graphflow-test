@@ -40,6 +40,7 @@ shell_path = '~/graphdb/graphflow/build/install/graphflow/bin/graphflow-cli'
 separator = ' '
 
 clause_gen = Clause_generator()
+var_gen = Variable_generator()
 
 '''
 (:organisation)-[:isLocatedIn]->(:place), (:place)-[isPartOf]->(:place);
@@ -74,6 +75,28 @@ def generate_create_edge_commands(edge_file, save_file):
                                             to_id, to_type)
             save_file.write(clause+'\n')
             line = f.readline()
+    f.close()
+
+def generate_match_command(query_file, save_file):
+    with open(query_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        query_num = int(pattern.findall(line)[0])
+        for i in range(0, query_num):
+            line = f.readline()
+            node_num, edge_num = list(map(int, pattern.findall(line)))
+            node_types = []
+            for j in range(0, node_num):
+                line = f.readline()
+                node_types.append(int(pattern.findall(line)[0]))
+            for j in range(0, edge_num):
+                line = f.readline()
+                from_id, to_id, edge_type = list(map(int, pattern.findall(line)))
+                from_type = node_types[from_id]
+                to_type = node_types[to_id]
+                from_id = var_gen.get_variable()
+                to_id = var_gen.get_variable()
+                clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
+            save_file.write(clause_gen.create_continuous_edge()+'\n')
     f.close()
 
 '''
@@ -117,12 +140,17 @@ if __name__ == '__main__' :
     exec(preprocess_commands)
     '''
 
+    '''
     preprocess_file = open(preprocess_commands, 'w', encoding='utf-8')
     generate_create_vertex_commands(dir+nodes, preprocess_file)
     print('finish nodes ! \n')
     generate_create_edge_commands(dir+base_edges, preprocess_file)
-    preprocess_file.close()
+    print('finish base edge ! \n')
 
+    preprocess_file.close()
+    '''
+    test_file = open('test.txt', 'w', encoding='utf-8')
+    generate_match_command(dir+query, test_file)
 
 
 
