@@ -20,6 +20,10 @@ nodes = 'node.txt'
 stream_edges = 'stream_edges.txt'
 query = 'query.txt'
 
+#id -> label
+pattern = re.compile(r'\d+')
+dict = {}
+
 #生成要load的图，需要的一些预处理的命令
 preprocess_commands = 'command/preprocess.txt'
 
@@ -48,17 +52,16 @@ load_clase = 'load from dir \"{0}\";'
 convert all the vertex files to a single cypher commands file
 '''
 def generate_create_vertex_commands(node_file, save_file):
-    count = 0
     with open(node_file, 'r', encoding='utf-8') as f:
-        line = f.readline().strip('\n')
+        line = f.readline()
         while line:
-            id, label = list(map(int, line.split(separator)))
+            id, label = list(map(int, pattern.findall(line)))
             clause = clause_gen.create_vertex(id, label)
             save_file.write(clause + '\n')
-            count += 1
             line = f.readline().strip('\n')
+            dict[id] = label
+            break
     f.close()
-    print('total lines :', count)
 
 def generate_create_edge_commands(edge_file, save_file):
     '''
@@ -84,6 +87,11 @@ def generate_create_edge_commands(edge_file, save_file):
                     save_file = insert_file
         f.close()
     '''
+    with open(edge_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        while line:
+
+            line = f.readline()
 
 '''
 execute the command file generated using " echo command | shell "
