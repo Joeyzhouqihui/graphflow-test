@@ -56,6 +56,7 @@ def generate_create_vertex_commands(node_file, save_file):
             clause = clause_gen.create_vertex(id, label)
             save_file.write(clause + '\n')
             count += 1
+            line = f.readline().strip('\n')
     f.close()
     print('total lines :', count)
 
