@@ -60,38 +60,19 @@ def generate_create_vertex_commands(node_file, save_file):
             save_file.write(clause + '\n')
             line = f.readline()
             dict[id] = label
-            print(id, label)
-            break
     f.close()
 
 def generate_create_edge_commands(edge_file, save_file):
-    '''
-    for file in edge_files:
-        save_file = preprocessing_file
-        from_type, edge_type, to_type = filename_to_filetype[file]
-        from_offset = vertex_to_idoffset[from_type]
-        to_offset = vertex_to_idoffset[to_type]
-        total_lines = get_file_lines(dir+file)
-        count = 0
-        with open(dir+file, 'r', encoding='utf-8') as f:
-            line = f.readline()
-            line = f.readline().strip('\n')
-            while line:
-                from_id, to_id = list(map(int, line.split(separator)))
-                clause = clause_gen.create_edge(from_id+from_offset, from_type,
-                                                edge_type,
-                                                to_id+to_offset, to_type)
-                save_file.write(clause+'\n')
-                line = f.readline().strip('\n')
-                count += 1
-                if count > 5:
-                    save_file = insert_file
-        f.close()
-    '''
     with open(edge_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         while line:
-
+            from_id, edge_type, to_id = list(map(int, pattern.findall(line)))
+            from_type =  dict[from_id]
+            to_type = dict[to_id]
+            clause = clause_gen.create_edge(from_id, from_type,
+                                            edge_type,
+                                            to_id, to_type)
+            save_file.write(clause+'\n')
             line = f.readline()
 
 '''
@@ -137,6 +118,7 @@ if __name__ == '__main__' :
 
     preprocess_file = open(preprocess_commands, 'w', encoding='utf-8')
     generate_create_vertex_commands(dir+nodes, preprocess_file)
+    generate_create_edge_commands(dir+base_edges, preprocess_file)
     preprocess_file.close()
 
 
