@@ -58,8 +58,9 @@ def generate_create_vertex_commands(node_file, save_file):
             id, label = list(map(int, pattern.findall(line)))
             clause = clause_gen.create_vertex(id, label)
             save_file.write(clause + '\n')
-            line = f.readline().strip('\n')
+            line = f.readline()
             dict[id] = label
+            print(id, label)
             break
     f.close()
 
