@@ -74,6 +74,7 @@ def generate_create_edge_commands(edge_file, save_file):
                                             to_id, to_type)
             save_file.write(clause+'\n')
             line = f.readline()
+    f.close()
 
 '''
 execute the command file generated using " echo command | shell "
@@ -118,6 +119,7 @@ if __name__ == '__main__' :
 
     preprocess_file = open(preprocess_commands, 'w', encoding='utf-8')
     generate_create_vertex_commands(dir+nodes, preprocess_file)
+    print('finish nodes ! \n')
     generate_create_edge_commands(dir+base_edges, preprocess_file)
     preprocess_file.close()
 
