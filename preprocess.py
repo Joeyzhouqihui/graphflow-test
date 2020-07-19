@@ -25,10 +25,10 @@ pattern = re.compile(r'\d+')
 dict = {}
 
 #生成要load的图，需要的一些预处理的命令
-preprocess_commands = 'command/preprocess.txt'
+base_command_file = 'command/base_command.txt'
 
 #不断插入新边的命令
-insert_commands = 'command/insert.txt'
+stream_command_file = 'command/stream_command.txt'
 
 #前半个图的存放地点
 data_to_load = 'base_graph'
@@ -46,8 +46,8 @@ var_gen = Variable_generator()
 (:organisation)-[:isLocatedIn]->(:place), (:place)-[isPartOf]->(:place);
 '''
 match_clause = 'Continuously match (m:organisation)-[:isLocatedIn]->(n:place), (n:place)-[:isPartOf]->(r:place) file \"result.txt\";'
-save_clause = 'save to dir \"{0}\";'
-load_clase = 'load from dir \"{0}\";'
+save_clause = 'save to dir \"base_graph\";'
+load_clase = 'load from dir \"base_graph\";'
 
 '''
 convert all the vertex files to a single cypher commands file
@@ -99,28 +99,6 @@ def generate_match_command(query_file, save_file):
             save_file.write(clause_gen.create_continuous_edge()+'\n')
     f.close()
 
-'''
-execute the command file generated using " echo command | shell "
-'''
-echo_statement = 'echo \"{0}\"'
-def echo_exec(clauses):
-    clause = ' '.join(clauses).replace("\"", "\\\"")
-    os.system(echo_statement.format(clause) + '|' + shell_path)
-
-def exec(command_file, batch = 1000):# 1000句一起执行
-    with open(command_file, 'r', encoding='utf-8') as file:
-        line = file.readline()
-        clauses = []
-        while line:
-            if len(clauses) < batch:
-                clauses.append(line)
-            else:
-                echo_exec(clauses)
-                clauses.clear()
-            line = file.readline()
-        if len(clauses) > 0: echo_exec(clauses)
-    file.close()
-
 if __name__ == '__main__' :
     '''
     preprocess_file = open(preprocess_commands, 'w', encoding='utf-8')
@@ -140,18 +118,20 @@ if __name__ == '__main__' :
     exec(preprocess_commands)
     '''
 
-    '''
-    preprocess_file = open(preprocess_commands, 'w', encoding='utf-8')
-    generate_create_vertex_commands(dir+nodes, preprocess_file)
+    base_file = open(base_command_file, 'w', encoding='utf-8')
+    generate_create_vertex_commands(dir+nodes, base_file)
     print('finish nodes ! \n')
-    generate_create_edge_commands(dir+base_edges, preprocess_file)
+    generate_create_edge_commands(dir+base_edges, base_file)
     print('finish base edge ! \n')
+    base_file.write(save_clause + '\n')
+    base_file.close()
 
-    preprocess_file.close()
-    '''
-    test_file = open('test.txt', 'w', encoding='utf-8')
-    generate_match_command(dir+query, test_file)
-
-
+    stream_file = open(stream_command_file, 'w', encoding='utf-8')
+    stream_file.write(load_clase + '\n')
+    generate_match_command(dir+query, stream_file)
+    print('finish continuously match clauses ! \n')
+    generate_create_edge_commands(dir+stream_edges, stream_file)
+    print('finish stream edge ! \n')
+    stream_file.close()
 
 
