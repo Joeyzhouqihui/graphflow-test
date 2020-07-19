@@ -9,6 +9,7 @@ class Clause_generator():
         self.continuous_match_clause = "Continuously match"
         self.sep_clause = ","
         self.tmp = None
+        self.file = "file \"{0}\""
 
     #传入一个字典，然后构建properties
     def construct_prop(self, dic):
@@ -73,8 +74,8 @@ class Clause_generator():
         else:
             self.tmp = self.tmp + self.sep_clause + edge
 
-    def create_continuous_edge(self):
-        return_clause = self.continuous_match_clause + ' ' + self.tmp + self.end_clause
+    def create_continuous_edge(self, filename):
+        return_clause = self.continuous_match_clause + ' ' + self.tmp + ' ' + self.file.format(filename) + ' ' + self.end_clause
         self.tmp = None
         return return_clause
 
