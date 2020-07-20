@@ -49,6 +49,9 @@ match_clause = 'Continuously match (m:organisation)-[:isLocatedIn]->(n:place), (
 save_clause = 'save to dir \"base_graph\";'
 load_clase = 'load from dir \"base_graph\";'
 
+def alter_type(type):
+    return '_' + type
+
 '''
 convert all the vertex files to a single cypher commands file
 '''
@@ -56,7 +59,8 @@ def generate_create_vertex_commands(node_file, save_file):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         while line:
-            id, label = list(map(int, pattern.findall(line)))
+            id, label = list(pattern.findall(line))
+            label = alter_type(label)
             clause = clause_gen.create_vertex(id, label)
             save_file.write(clause + '\n')
             line = f.readline()
@@ -67,9 +71,10 @@ def generate_create_edge_commands(edge_file, save_file):
     with open(edge_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         while line:
-            from_id, edge_type, to_id = list(map(int, pattern.findall(line)))
+            from_id, edge_type, to_id = list(pattern.findall(line))
             from_type =  dict[from_id]
             to_type = dict[to_id]
+            edge_type = alter_type(edge_type)
             clause = clause_gen.create_edge(from_id, from_type,
                                             edge_type,
                                             to_id, to_type)
@@ -87,14 +92,15 @@ def generate_match_command(query_file, save_file):
             node_types = []
             for j in range(0, node_num):
                 line = f.readline()
-                node_types.append(int(pattern.findall(line)[0]))
+                node_types.append(pattern.findall(line)[0])
             for j in range(0, edge_num):
                 line = f.readline()
-                from_id, to_id, edge_type = list(map(int, pattern.findall(line)))
-                from_type = node_types[from_id]
-                to_type = node_types[to_id]
+                from_id, to_id, edge_type = list(pattern.findall(line))
+                from_type = alter_type(node_types[int(from_id)])
+                to_type = alter_type(node_types[int(to_id)])
                 from_id = var_gen.get_variable()
                 to_id = var_gen.get_variable()
+                edge_type = alter_type(edge_type)
                 clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
             save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
     f.close()
