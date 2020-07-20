@@ -69,7 +69,7 @@ def generate_create_edge_commands(edge_file, save_file):
         while line:
             from_id, edge_type, to_id = list(map(int, pattern.findall(line)))
             from_type =  dict[from_id]
-            to_type = dict[to_id]
+            to_type = 0 #dict[to_id]
             clause = clause_gen.create_edge(from_id, from_type,
                                             edge_type,
                                             to_id, to_type)
