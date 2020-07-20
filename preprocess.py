@@ -68,8 +68,8 @@ def generate_create_edge_commands(edge_file, save_file):
         line = f.readline()
         while line:
             from_id, edge_type, to_id = list(map(int, pattern.findall(line)))
-            from_type =  0 #dict[from_id]
-            to_type = 0 #dict[to_id]
+            from_type =  dict[from_id]
+            to_type = dict[to_id]
             clause = clause_gen.create_edge(from_id, from_type,
                                             edge_type,
                                             to_id, to_type)
@@ -118,13 +118,13 @@ if __name__ == '__main__' :
     exec(preprocess_commands)
     '''
 
-    #base_file = open(base_command_file, 'w', encoding='utf-8')
-    #generate_create_vertex_commands(dir+nodes, base_file)
+    base_file = open(base_command_file, 'w', encoding='utf-8')
+    generate_create_vertex_commands(dir+nodes, base_file)
     print('finish nodes ! \n')
-    #generate_create_edge_commands(dir+base_edges, base_file)
+    generate_create_edge_commands(dir+base_edges, base_file)
     print('finish base edge ! \n')
-    #base_file.write(save_clause + '\n')
-    #base_file.close()
+    base_file.write(save_clause + '\n')
+    base_file.close()
 
     stream_file = open(stream_command_file, 'w', encoding='utf-8')
     stream_file.write(load_clase + '\n')
