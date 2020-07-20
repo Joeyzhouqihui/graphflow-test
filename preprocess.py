@@ -96,7 +96,7 @@ def generate_match_command(query_file, save_file):
                 from_id = var_gen.get_variable()
                 to_id = var_gen.get_variable()
                 clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
-            save_file.write(clause_gen.create_continuous_edge()+'\n')
+            save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
     f.close()
 
 if __name__ == '__main__' :
