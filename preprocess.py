@@ -75,6 +75,16 @@ def generate_create_vertex_commands(node_file, save_file, bz = 100):
             save_file.write(clause + '\n')
     f.close()
 
+def count_vertex(node_file):
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            count += 1
+        print('count : ', count)
+    f.close()
+
+
 def generate_create_edge_commands(edge_file, save_file):
     with open(edge_file, 'r', encoding='utf-8') as f:
         line = f.readline()
@@ -132,6 +142,7 @@ if __name__ == '__main__' :
     exec(preprocess_commands)
     '''
 
+    '''
     base_file = open(base_command_file, 'w', encoding='utf-8')
     generate_create_vertex_commands(dir+nodes, base_file)
     print('finish nodes ! \n')
@@ -147,5 +158,9 @@ if __name__ == '__main__' :
     generate_create_edge_commands(dir+stream_edges, stream_file)
     print('finish stream edge ! \n')
     stream_file.close()
+    '''
+    count_vertex(dir+nodes)
+
+
 
 
