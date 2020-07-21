@@ -101,6 +101,16 @@ def generate_create_edge_commands(edge_file, save_file):
             line = f.readline()
     f.close()
 
+def count_edge(edge_file):
+    with open(edge_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            count += 1
+            line = f.readline()
+        print('count : ', count)
+    f.close()
+
 def generate_match_command(query_file, save_file):
     with open(query_file, 'r', encoding='utf-8') as f:
         line = f.readline()
@@ -161,6 +171,7 @@ if __name__ == '__main__' :
     stream_file.close()
     '''
     count_vertex(dir+nodes)
+    count_edge(dir+base_edges)
 
 
 
