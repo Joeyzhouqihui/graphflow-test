@@ -55,16 +55,24 @@ def alter_type(type):
 '''
 convert all the vertex files to a single cypher commands file
 '''
-def generate_create_vertex_commands(node_file, save_file):
+def generate_create_vertex_commands(node_file, save_file, bz = 100):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
+        count = 0
         while line:
             id, label = list(pattern.findall(line))
             label = alter_type(label)
-            clause = clause_gen.create_vertex(id, label)
-            save_file.write(clause + '\n')
+            clause_gen.add_vertex(id, label)
+            count += 1
+            if count >= bz:
+                clause = clause_gen.create_vertex()
+                save_file.write(clause + '\n')
+                count = 0
             line = f.readline()
             dict[id] = label
+        if count > 0:
+            clause = clause_gen.create_vertex()
+            save_file.write(clause + '\n')
     f.close()
 
 def generate_create_edge_commands(edge_file, save_file):

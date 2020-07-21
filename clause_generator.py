@@ -44,17 +44,17 @@ class Clause_generator():
             edge = self.edge_clause.format(edge_type, props)
         return from_vertex + edge + to_vertex
 
-    def create_vertex(self, id, type, prop=None):
+    def add_vertex(self, id, type, prop=None):
         vertex = self.construct_vertex(id, type, prop)
-        return self.create_clause + ' ' + vertex + self.end_clause
+        if self.tmp is None:
+            self.tmp = vertex
+        else:
+            self.tmp = self.tmp + self.sep_clause + vertex
 
-    def create_vertices(self, ids, types, props=None):
-        len = len(ids)
-        vertices = []
-        for i in range(len):
-            vertex = self.construct_vertex(ids[i], types[i], props[i])
-            vertices.append(vertex)
-        return self.create_clause + ' ' + ','.join(vertices) + self.end_clause
+    def create_vertex(self):
+        return_clause = self.create_clause + ' ' + self.tmp + self.end_clause
+        self.tmp = None
+        return return_clause
 
     def create_edge(self,
                     from_id, from_type,
