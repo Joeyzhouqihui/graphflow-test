@@ -81,6 +81,7 @@ def count_vertex(node_file):
         count = 0
         while line:
             count += 1
+            line = f.readline()
         print('count : ', count)
     f.close()
 
