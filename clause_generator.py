@@ -52,17 +52,29 @@ class Clause_generator():
             self.tmp = self.tmp + self.sep_clause + vertex
 
     def create_vertex(self):
+        if self.tmp is None:
+            return ';'
         return_clause = self.create_clause + ' ' + self.tmp + self.end_clause
         self.tmp = None
         return return_clause
 
-    def create_edge(self,
+    def add_edge(self,
                     from_id, from_type,
                     edge_type,
                     to_id, to_type,
                     from_prop = None, edge_prop = None, to_prop = None):
         edge = self.construct_edge(from_id, from_type, edge_type, to_id, to_type, from_prop, edge_prop, to_prop)
-        return self.create_clause + ' ' + edge + self.end_clause
+        if self.tmp is None:
+            self.tmp = edge
+        else:
+            self.tmp = self.tmp + self.sep_clause + edge
+
+    def create_edge(self):
+        if self.tmp is None:
+            return ';'
+        return_clause = self.create_clause + ' ' + self.tmp + self.end_clause
+        self.tmp = None
+        return return_clause
 
     def add_match_edge(self,
                         from_var, from_type,
@@ -75,6 +87,8 @@ class Clause_generator():
             self.tmp = self.tmp + self.sep_clause + edge
 
     def create_continuous_edge(self, filename):
+        if self.tmp is None:
+            return ';'
         return_clause = self.continuous_match_clause + ' ' + self.tmp + ' ' + self.file.format(filename) + ' ' + self.end_clause
         self.tmp = None
         return return_clause

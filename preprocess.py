@@ -86,19 +86,25 @@ def count_vertex(node_file):
     f.close()
 
 
-def generate_create_edge_commands(edge_file, save_file):
+def generate_create_edge_commands(edge_file, save_file, bz = 100):
     with open(edge_file, 'r', encoding='utf-8') as f:
         line = f.readline()
+        count = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
             from_type =  dict[from_id]
             to_type = dict[to_id]
             edge_type = alter_type(edge_type)
-            clause = clause_gen.create_edge(from_id, from_type,
-                                            edge_type,
-                                            to_id, to_type)
-            save_file.write(clause+'\n')
+            clause_gen.add_edge(from_id, from_type, edge_type, to_id, to_type)
+            count += 1
+            if count >= bz:
+                clause = clause_gen.create_edge()
+                save_file.write(clause + '\n')
+                count = 0
             line = f.readline()
+        if count > 0:
+            clause = clause_gen.create_vertex()
+            save_file.write(clause + '\n')
     f.close()
 
 def count_edge(edge_file):
@@ -153,11 +159,11 @@ if __name__ == '__main__' :
     exec(preprocess_commands)
     '''
 
-    '''
+
     base_file = open(base_command_file, 'w', encoding='utf-8')
-    generate_create_vertex_commands(dir+nodes, base_file)
+    generate_create_vertex_commands(dir+nodes, base_file, bz=200)
     print('finish nodes ! \n')
-    generate_create_edge_commands(dir+base_edges, base_file)
+    generate_create_edge_commands(dir+base_edges, base_file, bz=200)
     print('finish base edge ! \n')
     base_file.write(save_clause + '\n')
     base_file.close()
@@ -166,13 +172,7 @@ if __name__ == '__main__' :
     stream_file.write(load_clase + '\n')
     generate_match_command(dir+query, stream_file)
     print('finish continuously match clauses ! \n')
-    generate_create_edge_commands(dir+stream_edges, stream_file)
+    generate_create_edge_commands(dir+stream_edges, stream_file, bz=1)
     print('finish stream edge ! \n')
     stream_file.close()
-    '''
-    count_vertex(dir+nodes)
-    count_edge(dir+base_edges)
-
-
-
 
