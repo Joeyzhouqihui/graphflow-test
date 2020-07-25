@@ -22,10 +22,11 @@ def generate_create_vertex_commands_v2(node_file, rate = 1/10):
             id = pattern.findall(line)[0]
             id = -int(id)
             if count >= size:
-                if id > heapq.nsmallest(1, heap):
+                if id > heapq.nsmallest(1, heap)[0]:
                     heapq.heapreplace(heap, id)
             else:
                 heapq.heappush(heap, id)
+                count += 1
             line = f.readline()
     f.close()
     print('size : ', size)
