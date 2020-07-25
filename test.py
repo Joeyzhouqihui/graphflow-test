@@ -19,7 +19,7 @@ def generate_create_vertex_commands_v2(node_file, rate = 1/10):
         line = f.readline()
         count = 0
         while line:
-            id = list(pattern.findall(line))
+            id = pattern.findall(line)
             id = -int(id)
             if count >= size:
                 if id > heapq.nsmallest(1, heap):
