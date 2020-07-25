@@ -29,7 +29,7 @@ def generate_create_vertex_commands_v2(node_file, rate = 1/10):
             line = f.readline()
     f.close()
     print('size : ', size)
-    print(-heapq.nsmallest(1, heap))
+    print(-heapq.nsmallest(1, heap)[0])
 
 if __name__ == "__main__":
     generate_create_vertex_commands_v2(node_file)
