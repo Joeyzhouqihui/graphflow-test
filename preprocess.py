@@ -141,24 +141,6 @@ def generate_match_command(query_file, save_file):
     f.close()
 
 if __name__ == '__main__' :
-    '''
-    preprocess_file = open(preprocess_commands, 'w', encoding='utf-8')
-    insert_file = open(insert_commands, 'w', encoding='utf-8')
-    #先创建节点
-    generate_create_vertex_commands(preprocess_file)
-    #在第二个插入脚本前加一句load和match
-    insert_file.write(load_clase.format(data_to_load) + '\n')
-    insert_file.write(match_clause + '\n')
-    #补全边
-    generate_create_edge_commands(preprocess_file, insert_file)
-    #在预处理最后进行一次save
-    preprocess_file.write(save_clause.format(data_to_load) + '\n')
-    preprocess_file.close()
-    insert_file.close()
-
-    exec(preprocess_commands)
-    '''
-
 
     base_file = open(base_command_file, 'w', encoding='utf-8')
     generate_create_vertex_commands(dir+nodes, base_file, bz=200)
