@@ -95,8 +95,8 @@ def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/
                     clause = clause_gen.create_vertex()
                     save_file.write(clause + '\n')
                     count = 0
-                line = f.readline()
                 dict[id] = label
+            line = f.readline()
         if count > 0:
             clause = clause_gen.create_vertex()
             save_file.write(clause + '\n')
@@ -119,7 +119,7 @@ def generate_create_edge_commands_v2(edge_file, save_file, barrier, bz = 100):
                     clause = clause_gen.create_edge()
                     save_file.write(clause + '\n')
                     count = 0
-                line = f.readline()
+            line = f.readline()
         if count > 0:
             clause = clause_gen.create_vertex()
             save_file.write(clause + '\n')
