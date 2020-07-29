@@ -56,7 +56,7 @@ def alter_type(type):
 '''
 convert a part of the vertex files to a single cypher commands file
 '''
-def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/10000):
+def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/1000):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
