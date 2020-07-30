@@ -161,7 +161,7 @@ def generate_create_edge_commands_v2(edge_file, save_file, barrier, bz = 100):
         count = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
-            if int(from_id) <= barrier and int(to_id) <= barrier:
+            if int(from_id) < barrier and int(to_id) < barrier:
                 from_type =  dict[from_id]
                 to_type = dict[to_id]
                 edge_type = alter_type(edge_type)
