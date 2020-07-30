@@ -53,6 +53,20 @@ load_clase = 'load from dir \"base_graph\";'
 def alter_type(type):
     return '_' + type
 
+def isIncreasing(node_file):
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        pre = -1
+        while line:
+            id, label = list(pattern.findall(line))
+            id = int(id)
+            if id < pre  :
+                print("fuck, it is not restrictly increasing !")
+                return False
+            line = f.readline()
+    f.close()
+    return True
+
 '''
 convert a part of the vertex files to a single cypher commands file
 '''
@@ -149,6 +163,7 @@ def generate_match_command(query_file, save_file):
     f.close()
 
 if __name__ == '__main__' :
+    '''
     base_file = open(base_command_file, 'w', encoding='utf-8')
     barrier = generate_create_vertex_commands_v2(dir+nodes, base_file, bz=200)
     print('finish nodes ! \n')
@@ -164,4 +179,5 @@ if __name__ == '__main__' :
     generate_create_edge_commands_v2(dir+stream_edges, stream_file, barrier, bz=1)
     print('finish stream edge ! \n')
     stream_file.close()
-
+    '''
+    isIncreasing(dir+nodes)
