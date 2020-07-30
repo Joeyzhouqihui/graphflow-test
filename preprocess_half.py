@@ -219,5 +219,21 @@ if __name__ == '__main__' :
     stream_file.close()
     '''
     base_file = open(base_command_file, 'w', encoding='utf-8')
-    generate_create_vertex_commands_v1(dir+nodes, base_file, bz=200)
-    
+    if isIncreasing(dir+nodes):
+        barrier = generate_create_vertex_commands_v1(dir+nodes, base_file, bz=200)
+    else:
+        barrier = generate_create_vertex_commands_v2(dir + nodes, base_file, bz=200)
+    print('finish nodes ! \n')
+    generate_create_edge_commands_v2(dir + base_edges, base_file, barrier, bz=200)
+    print('finish base edge ! \n')
+    base_file.write(save_clause + '\n')
+    base_file.close()
+
+    stream_file = open(stream_command_file, 'w', encoding='utf-8')
+    stream_file.write(load_clase + '\n')
+    generate_match_command(dir + query, stream_file)
+    print('finish continuously match clauses ! \n')
+    generate_create_edge_commands_v2(dir + stream_edges, stream_file, barrier, bz=1)
+    print('finish stream edge ! \n')
+    stream_file.close()
+
