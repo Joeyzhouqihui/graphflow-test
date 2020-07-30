@@ -70,6 +70,44 @@ def isIncreasing(node_file):
 '''
 convert a part of the vertex files to a single cypher commands file
 '''
+
+def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/1000):
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            count += 1
+            line = f.readline()
+    f.close()
+    size = int(rate * count)
+    print("total node num : ", size)
+    barrier = 0
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        count2 = 0
+        while line:
+            id, label = list(pattern.findall(line))
+            if count < size:
+                label = alter_type(label)
+                clause_gen.add_vertex(id, label)
+                count += 1
+                count2 += 1
+                if count2 >= bz:
+                    clause = clause_gen.create_vertex()
+                    save_file.write(clause + '\n')
+                    count2 = 0
+                dict[id] = label
+            else:
+                barrier = int(id)
+                break
+            line = f.readline()
+        if count2 > 0:
+            clause = clause_gen.create_vertex()
+            save_file.write(clause + '\n')
+    f.close()
+    return barrier
+
 def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/1000):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
@@ -180,4 +218,6 @@ if __name__ == '__main__' :
     print('finish stream edge ! \n')
     stream_file.close()
     '''
-    isIncreasing(dir+nodes)
+    base_file = open(base_command_file, 'w', encoding='utf-8')
+    generate_create_vertex_commands_v1(dir+nodes, base_file, bz=200)
+    
