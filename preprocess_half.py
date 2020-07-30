@@ -64,6 +64,7 @@ def isIncreasing(node_file):
                 print("fuck, it is not restrictly increasing !")
                 return False
             line = f.readline()
+            pre = id
     f.close()
     return True
 
@@ -71,7 +72,7 @@ def isIncreasing(node_file):
 convert a part of the vertex files to a single cypher commands file
 '''
 
-def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/1000):
+def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/100000):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
@@ -106,9 +107,10 @@ def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/
             clause = clause_gen.create_vertex()
             save_file.write(clause + '\n')
     f.close()
+    print("last is", barrier)
     return barrier
 
-def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/1000):
+def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/100000):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
@@ -153,11 +155,13 @@ def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/
             clause = clause_gen.create_vertex()
             save_file.write(clause + '\n')
     f.close()
+    print("max id is : ", barrier)
     return barrier
 
 def generate_create_edge_commands_v2(edge_file, save_file, barrier, bz = 100):
     with open(edge_file, 'r', encoding='utf-8') as f:
         line = f.readline()
+        total_edge = 0
         count = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
@@ -172,9 +176,11 @@ def generate_create_edge_commands_v2(edge_file, save_file, barrier, bz = 100):
                     save_file.write(clause + '\n')
                     count = 0
             line = f.readline()
+            total_edge += 1
         if count > 0:
             clause = clause_gen.create_vertex()
             save_file.write(clause + '\n')
+        print("total edge is : ", total_edge)
     f.close()
 
 def generate_match_command(query_file, save_file):
