@@ -95,7 +95,7 @@ def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/
             save_file.write(clause + '\n')
     f.close()
 
-def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/10000):
+def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/100000):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
@@ -235,9 +235,9 @@ if __name__ == '__main__' :
     stream_file.close()
     '''
     base_file = open(base_command_file, 'w', encoding='utf-8')
-    generate_create_vertex_commands_v1(dir+nodes, base_file, bz=100)
+    barrier = generate_create_vertex_commands_v2(dir+nodes, base_file, bz=100)
     print('finish nodes ! \n')
-    generate_create_edge_commands_v1(dir + base_edges, base_file, bz=100)
+    generate_create_edge_commands_v2(dir + base_edges, base_file, barrier, bz=100)
     print('finish base edge ! \n')
     base_file.write(save_clause + '\n')
     base_file.close()
