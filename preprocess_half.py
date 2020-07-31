@@ -2,6 +2,7 @@ import os
 import re
 from clause_generator import *
 import heapq
+import random
 
 '''
 此脚本主要做以下的事情
@@ -77,38 +78,22 @@ def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/
         line = f.readline()
         count = 0
         while line:
-            count += 1
-            line = f.readline()
-    f.close()
-    size = int(rate * count)
-    print("total node num : ", size)
-    barrier = 0
-    with open(node_file, 'r', encoding='utf-8') as f:
-        line = f.readline()
-        count = 0
-        count2 = 0
-        while line:
             id, label = list(pattern.findall(line))
-            if count < size:
+            seed = random.random()
+            if seed <= rate:
                 label = alter_type(label)
                 clause_gen.add_vertex(id, label)
                 count += 1
-                count2 += 1
-                if count2 >= bz:
+                if count >= bz:
                     clause = clause_gen.create_vertex()
                     save_file.write(clause + '\n')
-                    count2 = 0
+                    count = 0
                 dict[id] = label
-            else:
-                barrier = int(id)
-                break
             line = f.readline()
-        if count2 > 0:
+        if count > 0:
             clause = clause_gen.create_vertex()
             save_file.write(clause + '\n')
     f.close()
-    print("last is", barrier)
-    return barrier
 
 def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/10000):
     with open(node_file, 'r', encoding='utf-8') as f:
@@ -157,6 +142,31 @@ def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/
     f.close()
     print("max id is : ", barrier)
     return barrier
+
+def generate_create_edge_commands_v1(edge_file, save_file, bz = 100):
+    with open(edge_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        total_edge = 0
+        count = 0
+        while line:
+            from_id, edge_type, to_id = list(pattern.findall(line))
+            if from_id in dict.keys() and to_id in dict.keys():
+                from_type =  dict[from_id]
+                to_type = dict[to_id]
+                edge_type = alter_type(edge_type)
+                clause_gen.add_edge(from_id, from_type, edge_type, to_id, to_type)
+                count += 1
+                if count >= bz:
+                    clause = clause_gen.create_edge()
+                    save_file.write(clause + '\n')
+                    count = 0
+                total_edge += 1
+            line = f.readline()
+        if count > 0:
+            clause = clause_gen.create_vertex()
+            save_file.write(clause + '\n')
+        print("total edge is : ", total_edge)
+    f.close()
 
 def generate_create_edge_commands_v2(edge_file, save_file, barrier, bz = 100):
     with open(edge_file, 'r', encoding='utf-8') as f:
@@ -225,12 +235,9 @@ if __name__ == '__main__' :
     stream_file.close()
     '''
     base_file = open(base_command_file, 'w', encoding='utf-8')
-    if isIncreasing(dir+nodes):
-        barrier = generate_create_vertex_commands_v1(dir+nodes, base_file, bz=100)
-    else:
-        barrier = generate_create_vertex_commands_v2(dir + nodes, base_file, bz=100)
+    generate_create_vertex_commands_v1(dir+nodes, base_file, bz=100)
     print('finish nodes ! \n')
-    generate_create_edge_commands_v2(dir + base_edges, base_file, barrier, bz=100)
+    generate_create_edge_commands_v1(dir + base_edges, base_file, bz=100)
     print('finish base edge ! \n')
     base_file.write(save_clause + '\n')
     base_file.close()
@@ -239,7 +246,7 @@ if __name__ == '__main__' :
     stream_file.write(load_clase + '\n')
     generate_match_command(dir + query, stream_file)
     print('finish continuously match clauses ! \n')
-    generate_create_edge_commands_v2(dir + stream_edges, stream_file, barrier, bz=1)
+    generate_create_edge_commands_v1(dir + stream_edges, stream_file, bz=1)
     print('finish stream edge ! \n')
     stream_file.close()
 
