@@ -72,7 +72,7 @@ def isIncreasing(node_file):
 convert a part of the vertex files to a single cypher commands file
 '''
 
-def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/100000):
+def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/10000):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
@@ -110,7 +110,7 @@ def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/
     print("last is", barrier)
     return barrier
 
-def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/100000):
+def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/10000):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
@@ -125,7 +125,7 @@ def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/
         count = 0
         while line:
             id = pattern.findall(line)[0]
-            id = -int(id)
+            id = int(id)
             if count >= size:
                 if id > heapq.nsmallest(1, heap)[0]:
                     heapq.heapreplace(heap, id)
@@ -135,13 +135,13 @@ def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/
             line = f.readline()
     f.close()
     print("node num : ", size)
-    barrier = -heapq.nsmallest(1, heap)[0]
+    barrier = heapq.nsmallest(1, heap)[0]
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
         while line:
             id, label = list(pattern.findall(line))
-            if int(id) <= barrier:
+            if int(id) >= barrier:
                 label = alter_type(label)
                 clause_gen.add_vertex(id, label)
                 count += 1
@@ -165,7 +165,7 @@ def generate_create_edge_commands_v2(edge_file, save_file, barrier, bz = 100):
         count = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
-            if int(from_id) < barrier and int(to_id) < barrier:
+            if int(from_id) >= barrier and int(to_id) >= barrier:
                 from_type =  dict[from_id]
                 to_type = dict[to_id]
                 edge_type = alter_type(edge_type)
@@ -175,8 +175,8 @@ def generate_create_edge_commands_v2(edge_file, save_file, barrier, bz = 100):
                     clause = clause_gen.create_edge()
                     save_file.write(clause + '\n')
                     count = 0
+                total_edge += 1
             line = f.readline()
-            total_edge += 1
         if count > 0:
             clause = clause_gen.create_vertex()
             save_file.write(clause + '\n')
@@ -226,11 +226,11 @@ if __name__ == '__main__' :
     '''
     base_file = open(base_command_file, 'w', encoding='utf-8')
     if isIncreasing(dir+nodes):
-        barrier = generate_create_vertex_commands_v1(dir+nodes, base_file, bz=200)
+        barrier = generate_create_vertex_commands_v1(dir+nodes, base_file, bz=100)
     else:
-        barrier = generate_create_vertex_commands_v2(dir + nodes, base_file, bz=200)
+        barrier = generate_create_vertex_commands_v2(dir + nodes, base_file, bz=100)
     print('finish nodes ! \n')
-    generate_create_edge_commands_v2(dir + base_edges, base_file, barrier, bz=200)
+    generate_create_edge_commands_v2(dir + base_edges, base_file, barrier, bz=100)
     print('finish base edge ! \n')
     base_file.write(save_clause + '\n')
     base_file.close()
