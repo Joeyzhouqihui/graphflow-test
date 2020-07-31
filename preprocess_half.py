@@ -143,6 +143,58 @@ def generate_create_vertex_commands_v2(node_file, save_file, bz = 100, rate = 1/
     print("max id is : ", barrier)
     return barrier
 
+def generate_create_vertex_commands_v3(node_file, save_file, bz = 100, rate = 1/100000):
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            count += 1
+            line = f.readline()
+    f.close()
+    size = int(rate * count)
+    maxheap = []
+    minheap = []
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            id = pattern.findall(line)[0]
+            id = int(id)
+            if count >= size:
+                if id > heapq.nsmallest(1, maxheap)[0]:
+                    heapq.heapreplace(maxheap, id)
+                if -id > -heapq.nsmallest(1, minheap)[0]:
+                    heapq.heapreplace(minheap, -id)
+            else:
+                heapq.heappush(maxheap, id)
+                heapq.heappush(minheap, -id)
+                count += 1
+            line = f.readline()
+    f.close()
+    print("node num : ", size)
+    lower_barrier = heapq.nsmallest(1, maxheap)[0]
+    upper_barrier = -heapq.nsmallest(1, minheap)[0]
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            id, label = list(pattern.findall(line))
+            if int(id) >= lower_barrier or int(id) <= upper_barrier:
+                label = alter_type(label)
+                clause_gen.add_vertex(id, label)
+                count += 1
+                if count >= bz:
+                    clause = clause_gen.create_vertex()
+                    save_file.write(clause + '\n')
+                    count = 0
+                dict[id] = label
+            line = f.readline()
+        if count > 0:
+            clause = clause_gen.create_vertex()
+            save_file.write(clause + '\n')
+    f.close()
+    return lower_barrier, upper_barrier
+
 def generate_create_edge_commands_v1(edge_file, save_file, bz = 100):
     with open(edge_file, 'r', encoding='utf-8') as f:
         line = f.readline()
@@ -176,6 +228,31 @@ def generate_create_edge_commands_v2(edge_file, save_file, barrier, bz = 100):
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
             if int(from_id) >= barrier and int(to_id) >= barrier:
+                from_type =  dict[from_id]
+                to_type = dict[to_id]
+                edge_type = alter_type(edge_type)
+                clause_gen.add_edge(from_id, from_type, edge_type, to_id, to_type)
+                count += 1
+                if count >= bz:
+                    clause = clause_gen.create_edge()
+                    save_file.write(clause + '\n')
+                    count = 0
+                total_edge += 1
+            line = f.readline()
+        if count > 0:
+            clause = clause_gen.create_vertex()
+            save_file.write(clause + '\n')
+        print("total edge is : ", total_edge)
+    f.close()
+
+def generate_create_edge_commands_v3(edge_file, save_file, lower_barrier, upper_barrier, bz = 100):
+    with open(edge_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        total_edge = 0
+        count = 0
+        while line:
+            from_id, edge_type, to_id = list(pattern.findall(line))
+            if (int(from_id) <= upper_barrier or int(from_id) >= lower_barrier) and (int(to_id) >= lower_barrier or int(to_id) <= upper_barrier):
                 from_type =  dict[from_id]
                 to_type = dict[to_id]
                 edge_type = alter_type(edge_type)
@@ -235,9 +312,9 @@ if __name__ == '__main__' :
     stream_file.close()
     '''
     base_file = open(base_command_file, 'w', encoding='utf-8')
-    barrier = generate_create_vertex_commands_v2(dir+nodes, base_file, bz=100)
+    lower_barrier, upper_barrier = generate_create_vertex_commands_v3(dir+nodes, base_file, bz=100)
     print('finish nodes ! \n')
-    generate_create_edge_commands_v2(dir + base_edges, base_file, barrier, bz=100)
+    generate_create_edge_commands_v3(dir + base_edges, base_file, lower_barrier, upper_barrier, bz=100)
     print('finish base edge ! \n')
     base_file.write(save_clause + '\n')
     base_file.close()
