@@ -54,15 +54,111 @@ load_clase = 'load from dir \"base_graph\";'
 def alter_type(type):
     return '_' + type
 
-def choose_edges(edge_file):
+def choose_edges(base_file, base_num, stream_file, stream_num):
+    with open(base_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            from_id, edge_type, to_id = list(pattern.findall(line))
+            dict[from_id] = None
+            dict[to_id] = None
+            count += 1
+            if count >= base_num: break
+            line = f.readline()
+        f.close()
+    with open(stream_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            from_id, edge_type, to_id = list(pattern.findall(line))
+            dict[from_id] = None
+            dict[to_id] = None
+            count += 1
+            if count >= stream_num: break
+            line = f.readline()
+        f.close()
+
+def generate_create_vertex_commands(node_file, save_file, bz = 100):
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            id, label = list(pattern.findall(line))
+            if id in dict.keys():
+                label = alter_type(label)
+                clause_gen.add_vertex(id, label)
+                count += 1
+                if count >= bz:
+                    clause = clause_gen.create_vertex()
+                    save_file.write(clause + '\n')
+                    count = 0
+                dict[id] = label
+            line = f.readline()
+        if count > 0:
+            clause = clause_gen.create_vertex()
+            save_file.write(clause + '\n')
+    f.close()
+
+def generate_create_edge_commands(edge_file, save_file, bz = 100):
     with open(edge_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
+            if from_id in dict.keys() and to_id in dict.keys():
+                from_type =  dict[from_id]
+                to_type = dict[to_id]
+                edge_type = alter_type(edge_type)
+                clause_gen.add_edge(from_id, from_type, edge_type, to_id, to_type)
+                count += 1
+                if count >= bz:
+                    clause = clause_gen.create_edge()
+                    save_file.write(clause + '\n')
+                    count = 0
             line = f.readline()
+        if count > 0:
+            clause = clause_gen.create_vertex()
+            save_file.write(clause + '\n')
     f.close()
 
-if __name__ == "__main__":
-    dict["123"]
-    print("123" in dict.keys())
+def generate_match_command(query_file, save_file):
+    with open(query_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        query_num = int(pattern.findall(line)[0])
+        for i in range(0, query_num):
+            line = f.readline()
+            node_num, edge_num = list(map(int, pattern.findall(line)))
+            node_types = []
+            for j in range(0, node_num):
+                line = f.readline()
+                node_types.append(pattern.findall(line)[0])
+            for j in range(0, edge_num):
+                line = f.readline()
+                from_id, to_id, edge_type = list(pattern.findall(line))
+                from_type = alter_type(node_types[int(from_id)])
+                to_type = alter_type(node_types[int(to_id)])
+                from_id = var_gen.get_variable()
+                to_id = var_gen.get_variable()
+                edge_type = alter_type(edge_type)
+                clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
+            save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
+    f.close()
+
+if __name__ == '__main__' :
+    base_file = open(base_command_file, 'w', encoding='utf-8')
+    choose_edges(dir + base_edges, 1000000, dir + stream_edges, 100000)
+    generate_create_vertex_commands(dir + nodes, base_file, bz=100)
+    print('finish nodes ! \n')
+    generate_create_edge_commands(dir + base_edges, base_file, bz=100)
+    print('finish base edge ! \n')
+    base_file.write(save_clause + '\n')
+    base_file.close()
+
+    stream_file = open(stream_command_file, 'w', encoding='utf-8')
+    stream_file.write(load_clase + '\n')
+    generate_match_command(dir + query, stream_file)
+    print('finish continuously match clauses ! \n')
+    generate_create_edge_commands(dir + stream_edges, stream_file, bz=1)
+    print('finish stream edge ! \n')
+    stream_file.close()
+
