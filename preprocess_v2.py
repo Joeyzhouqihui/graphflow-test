@@ -54,25 +54,9 @@ load_clase = 'load from dir \"base_graph\";'
 def alter_type(type):
     return '_' + type
 
-def isIncreasing(node_file):
-    with open(node_file, 'r', encoding='utf-8') as f:
-        line = f.readline()
-        pre = -1
-        while line:
-            id, label = list(pattern.findall(line))
-            id = int(id)
-            if id < pre  :
-                print("fuck, it is not restrictly increasing !")
-                return False
-            line = f.readline()
-            pre = id
-    f.close()
-    return True
-
 '''
 convert a part of the vertex files to a single cypher commands file
 '''
-
 def generate_create_vertex_commands_v1(node_file, save_file, bz = 100, rate = 1/10000):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
