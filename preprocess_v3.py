@@ -78,6 +78,23 @@ def choose_edges(base_file, base_num, stream_file, stream_num):
             line = f.readline()
         f.close()
 
+def count_nodes(base_file, base_num):
+    with open(base_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        node_count = 0
+        while line:
+            from_id, edge_type, to_id = list(pattern.findall(line))
+            if from_id in dict.keys(): node_count += 1
+            if to_id in dict.keys(): node_count += 1
+            dict[from_id] = None
+            dict[to_id] = None
+            count += 1
+            if count >= base_num: break
+            line = f.readline()
+        f.close()
+        print("node num is : ", node_count)
+
 def generate_create_vertex_commands(node_file, save_file, bz = 100):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
@@ -145,6 +162,7 @@ def generate_match_command(query_file, save_file):
     f.close()
 
 if __name__ == '__main__' :
+    '''
     base_file = open(base_command_file, 'w', encoding='utf-8')
     choose_edges(dir + base_edges, 1000000, dir + stream_edges, 100000)
     generate_create_vertex_commands(dir + nodes, base_file, bz=100)
@@ -161,4 +179,7 @@ if __name__ == '__main__' :
     generate_create_edge_commands(dir + stream_edges, stream_file, bz=1)
     print('finish stream edge ! \n')
     stream_file.close()
+    '''
+
+    count_nodes(dir + base_edges, 1000000)
 
