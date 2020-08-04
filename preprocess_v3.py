@@ -29,8 +29,11 @@ dict = {}
 #生成要load的图，需要的一些预处理的命令
 base_command_file = 'command/base_command.txt'
 
+#match命令
+match_command_file =  'command/match_command_num_{0}.txt'
+
 #不断插入新边的命令
-stream_command_file = 'command/stream_command.txt'
+stream_command_file = 'command/stream_command_bz_{0}.txt'
 
 #前半个图的存放地点
 data_to_load = 'base_graph'
@@ -78,23 +81,6 @@ def choose_edges(base_file, base_num, stream_file, stream_num):
             line = f.readline()
         f.close()
 
-def count_nodes(base_file, base_num):
-    with open(base_file, 'r', encoding='utf-8') as f:
-        line = f.readline()
-        count = 0
-        node_count = 0
-        while line:
-            from_id, edge_type, to_id = list(pattern.findall(line))
-            if from_id in dict.keys(): node_count += 1
-            if to_id in dict.keys(): node_count += 1
-            dict[from_id] = None
-            dict[to_id] = None
-            count += 1
-            if count >= base_num: break
-            line = f.readline()
-        f.close()
-        print("node num is : ", node_count)
-
 def generate_create_vertex_commands(node_file, save_file, bz = 100):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
@@ -116,13 +102,14 @@ def generate_create_vertex_commands(node_file, save_file, bz = 100):
             save_file.write(clause + '\n')
     f.close()
 
-def generate_create_edge_commands(edge_file, save_file, bz = 100):
+def generate_create_edge_commands(edge_file, save_file, num, bz = 100):
     with open(edge_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
+        edge_count = 1
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
-            if from_id in dict.keys() and to_id in dict.keys():
+            if edge_count <= num:
                 from_type =  dict[from_id]
                 to_type = dict[to_id]
                 edge_type = alter_type(edge_type)
@@ -132,16 +119,20 @@ def generate_create_edge_commands(edge_file, save_file, bz = 100):
                     clause = clause_gen.create_edge()
                     save_file.write(clause + '\n')
                     count = 0
+            else: break
             line = f.readline()
+            edge_count += 1
         if count > 0:
-            clause = clause_gen.create_vertex()
+            clause = clause_gen.create_edge()
             save_file.write(clause + '\n')
     f.close()
 
-def generate_match_command(query_file, save_file):
+def generate_match_command(query_file, save_file, num = None):
     with open(query_file, 'r', encoding='utf-8') as f:
         line = f.readline()
-        query_num = int(pattern.findall(line)[0])
+        if num is None:
+            query_num = int(pattern.findall(line)[0])
+        else: query_num = num
         for i in range(0, query_num):
             line = f.readline()
             node_num, edge_num = list(map(int, pattern.findall(line)))
@@ -162,24 +153,30 @@ def generate_match_command(query_file, save_file):
     f.close()
 
 if __name__ == '__main__' :
-    '''
+    #base graph
     base_file = open(base_command_file, 'w', encoding='utf-8')
     choose_edges(dir + base_edges, 1000000, dir + stream_edges, 100000)
     generate_create_vertex_commands(dir + nodes, base_file, bz=100)
-    print('finish nodes ! \n')
-    generate_create_edge_commands(dir + base_edges, base_file, bz=100)
-    print('finish base edge ! \n')
+    print('finish nodes !')
+    generate_create_edge_commands(dir + base_edges, base_file, num=1000000, bz=100)
+    print('finish base edge !')
     base_file.write(save_clause + '\n')
     base_file.close()
 
-    stream_file = open(stream_command_file, 'w', encoding='utf-8')
-    stream_file.write(load_clase + '\n')
-    generate_match_command(dir + query, stream_file)
-    print('finish continuously match clauses ! \n')
-    generate_create_edge_commands(dir + stream_edges, stream_file, bz=1)
-    print('finish stream edge ! \n')
-    stream_file.close()
-    '''
+    #match trigger
+    bzs = [10, 100, 1000]
+    for bz in bzs:
+        match_file = open(match_command_file.format(bz), 'w', encoding='utf-8')
+        match_file.write(load_clase + '\n')
+        generate_match_command(dir + query, match_file, num=bz)
+        match_file.close()
+    print('finish match !')
 
-    count_nodes(dir + base_edges, 1000000)
+    #stream graph
+    for bz in bzs:
+        stream_file = open(stream_command_file.format(bz), 'w', encoding='utf-8')
+        generate_create_edge_commands(dir + stream_edges, stream_file, num=100000, bz=bz)
+        stream_file.close()
+    print('finish stream edge !')
+
 
