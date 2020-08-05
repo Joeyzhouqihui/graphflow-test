@@ -167,6 +167,38 @@ def generate_match_command(query_file, save_file, num = None):
             save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
     f.close()
 
+def generate_specific_match_command(query_file, save_file, num = None):
+    with open(query_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        if num is None:
+            query_num = int(pattern.findall(line)[0])
+        else: query_num = num
+        count = 0
+        while count < query_num:
+            line = f.readline()
+            if line is None: break
+            node_num, edge_num = list(map(int, pattern.findall(line)))
+            node_types = []
+            for j in range(0, node_num):
+                line = f.readline()
+                node_types.append(pattern.findall(line)[0])
+            flag = False
+            for j in range(0, edge_num):
+                line = f.readline()
+                from_id, to_id, edge_type = list(pattern.findall(line))
+                from_type = alter_type(node_types[int(from_id)])
+                to_type = alter_type(node_types[int(to_id)])
+                from_id = var_gen.get_variable()
+                to_id = var_gen.get_variable()
+                edge_type = alter_type(edge_type)
+                if edge_type in myset:
+                    clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
+                    flag = True
+            if flag:
+                save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
+                count += 1
+    f.close()
+
 if __name__ == '__main__' :
     '''
     #base graph
@@ -197,4 +229,5 @@ if __name__ == '__main__' :
     '''
 
     get_edge_types(dir + base_edges, 500000)
-
+    match_file = open("command/match_command_test.txt", 'w', encoding='utf-8')
+    generate_specific_match_command(dir + query, match_file, num=2)
