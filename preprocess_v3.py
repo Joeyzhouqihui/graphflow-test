@@ -166,10 +166,9 @@ def generate_match_command(query_file, save_file, num = None):
     f.close()
 
 if __name__ == '__main__' :
-    ''' 
     #base graph
     base_file = open(base_command_file, 'w', encoding='utf-8')
-    choose_edges(dir + base_edges, 1000000, dir + stream_edges, 100000)
+    choose_edges(dir + base_edges, 500000, dir + stream_edges, 100000)
     generate_create_vertex_commands(dir + nodes, base_file, bz=100)
     print('finish nodes !')
     generate_create_edge_commands(dir + base_edges, base_file, num=1000000, bz=100)
@@ -192,8 +191,4 @@ if __name__ == '__main__' :
         generate_create_edge_commands(dir + stream_edges, stream_file, num=100000, bz=bz)
         stream_file.close()
     print('finish stream edge !')
-    '''
-
-    choose_edges(dir + base_edges, 1000000, dir + stream_edges, 100000)
-    check_vertex_labels(dir + nodes)
-
+    
