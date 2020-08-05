@@ -82,12 +82,16 @@ def choose_edges(base_file, base_num, stream_file, stream_num):
         f.close()
 
 myset = set()
-def get_edge_types(base_file):
+def get_edge_types(base_file, num):
     with open(base_file, 'r', encoding='utf-8') as f:
         line = f.readline()
+        count = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
             myset.add(edge_type)
+            count += 1
+            if count >= num:
+                break
             line = f.readline()
         f.close()
     print(list(myset))
@@ -192,5 +196,5 @@ if __name__ == '__main__' :
     print('finish stream edge !')
     '''
 
-    get_edge_types(dir + base_edges)
+    get_edge_types(dir + base_edges, 500000)
 
