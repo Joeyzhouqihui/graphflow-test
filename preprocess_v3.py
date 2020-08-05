@@ -47,6 +47,10 @@ separator = ' '
 clause_gen = Clause_generator()
 var_gen = Variable_generator()
 
+#match 语句所需的点的label和边的label
+required_node_labels = set()
+required_edge_types = set()
+
 '''
 (:organisation)-[:isLocatedIn]->(:place), (:place)-[isPartOf]->(:place);
 '''
@@ -86,7 +90,10 @@ def count_edges(base_file):
         line = f.readline()
         count = 0
         while line:
-            count += 1
+            from_id, edge_type, to_id = list(pattern.findall(line))
+            edge_type = alter_type(edge_type)
+            if edge_type in required_edge_types:
+                count += 1
             line = f.readline()
         f.close()
     print(count)
@@ -177,23 +184,19 @@ def generate_match_command(query_file, save_file, num = None):
             save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
     f.close()
 
-def generate_specific_match_command(query_file, save_file, num = None):
+def generate_match_command_v2(query_file, save_file, num = None):
     with open(query_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         if num is None:
             query_num = int(pattern.findall(line)[0])
         else: query_num = num
-        count = 0
-        while count < query_num:
+        for i in range(0, query_num):
             line = f.readline()
-            if not line: break
-            print(line)
             node_num, edge_num = list(map(int, pattern.findall(line)))
             node_types = []
             for j in range(0, node_num):
                 line = f.readline()
                 node_types.append(pattern.findall(line)[0])
-            flag = False
             for j in range(0, edge_num):
                 line = f.readline()
                 from_id, to_id, edge_type = list(pattern.findall(line))
@@ -202,12 +205,11 @@ def generate_specific_match_command(query_file, save_file, num = None):
                 from_id = var_gen.get_variable()
                 to_id = var_gen.get_variable()
                 edge_type = alter_type(edge_type)
-                if edge_type in myset:
-                    clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
-                    flag = True
-            if flag:
-                save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
-                count += 1
+                clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
+                required_node_labels.add(from_type)
+                required_node_labels.add(to_type)
+                required_edge_types.add(edge_type)
+            save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
     f.close()
 
 if __name__ == '__main__' :
@@ -239,5 +241,7 @@ if __name__ == '__main__' :
     print('finish stream edge !')
     '''
 
+    match_file = open("command/match_command_test.txt", 'w', encoding='utf-8')
+    generate_match_command_v2(dir + query, match_file, num=1000)
     count_edges(dir + base_edges)
     count_edges(dir + stream_edges)
