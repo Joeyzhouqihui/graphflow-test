@@ -81,6 +81,16 @@ def choose_edges(base_file, base_num, stream_file, stream_num):
             line = f.readline()
         f.close()
 
+def count_edges(base_file):
+    with open(base_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            count += 1
+            line = f.readline()
+        f.close()
+    print(count)
+
 myset = set()
 def get_edge_types(base_file, num):
     with open(base_file, 'r', encoding='utf-8') as f:
@@ -176,7 +186,8 @@ def generate_specific_match_command(query_file, save_file, num = None):
         count = 0
         while count < query_num:
             line = f.readline()
-            if line is None: break
+            if not line: break
+            print(line)
             node_num, edge_num = list(map(int, pattern.findall(line)))
             node_types = []
             for j in range(0, node_num):
@@ -228,6 +239,5 @@ if __name__ == '__main__' :
     print('finish stream edge !')
     '''
 
-    get_edge_types(dir + base_edges, 500000)
-    match_file = open("command/match_command_test.txt", 'w', encoding='utf-8')
-    generate_specific_match_command(dir + query, match_file, num=2)
+    count_edges(dir + base_edges)
+    count_edges(dir + stream_edges)
