@@ -102,6 +102,19 @@ def generate_create_vertex_commands(node_file, save_file, bz = 100):
             save_file.write(clause + '\n')
     f.close()
 
+myset = set()
+def check_vertex_labels(node_file):
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        while line:
+            id, label = list(pattern.findall(line))
+            if id in dict.keys():
+                label = alter_type(label)
+                myset.add(label)
+            line = f.readline()
+    f.close()
+    print("we have labels : ", list(myset))
+
 def generate_create_edge_commands(edge_file, save_file, num, bz = 100):
     with open(edge_file, 'r', encoding='utf-8') as f:
         line = f.readline()
@@ -153,6 +166,7 @@ def generate_match_command(query_file, save_file, num = None):
     f.close()
 
 if __name__ == '__main__' :
+    ''' 
     #base graph
     base_file = open(base_command_file, 'w', encoding='utf-8')
     choose_edges(dir + base_edges, 1000000, dir + stream_edges, 100000)
@@ -178,5 +192,8 @@ if __name__ == '__main__' :
         generate_create_edge_commands(dir + stream_edges, stream_file, num=100000, bz=bz)
         stream_file.close()
     print('finish stream edge !')
+    '''
 
+    choose_edges(dir + base_edges, 1000000, dir + stream_edges, 100000)
+    check_vertex_labels(dir + nodes)
 
