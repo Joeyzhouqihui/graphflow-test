@@ -223,7 +223,7 @@ def generate_match_command(query_file, save_file, num = None):
             save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
     f.close()
 
-def generate_match_command_v2(query_file, save_file, num = None):
+def get_required_labels_and_types_for_match(query_file, num = None):
     with open(query_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         if num is None:
@@ -244,11 +244,9 @@ def generate_match_command_v2(query_file, save_file, num = None):
                 from_id = var_gen.get_variable()
                 to_id = var_gen.get_variable()
                 edge_type = alter_type(edge_type)
-                clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
                 required_node_labels.add(from_type)
                 required_node_labels.add(to_type)
                 required_edge_types.add(edge_type)
-            save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
         print("required edges : ", required_edge_types)
         print("required nodes : ", required_node_labels)
     f.close()
@@ -282,7 +280,8 @@ if __name__ == '__main__' :
     print('finish stream edge !')
     '''
 
+    get_required_labels_and_types_for_match(dir + query, 1000)
     match_file = open("command/match_command_test.txt", 'w', encoding='utf-8')
-    generate_match_command_v2(dir + query, match_file, num=1000)
     match_preprocess_command(match_file)
+    generate_match_command(dir + query, match_file, num=1000)
     match_file.close()
