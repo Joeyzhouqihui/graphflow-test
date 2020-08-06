@@ -103,15 +103,18 @@ def count_edges(base_file, num = 100000):
     with open(base_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
-        count2 = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
             edge_type = alter_type(edge_type)
             if edge_type in required_edge_types:
                 count += 1
                 labels.add(edge_type)
-            count2 += 1
-            if count2 >= num: break
+            else:
+                seed = random.random()
+                if seed < 0.001:
+                    labels.add(edge_type)
+                    count += 1
+            if count >= num: break
             line = f.readline()
         f.close()
     print("edges : ", count)
@@ -280,5 +283,5 @@ if __name__ == '__main__' :
     '''
 
     get_required_labels_and_types_for_match(dir + query, 1000)
-    count_edges(dir + base_edges, 500000)
-    count_edges(dir + stream_edges, 100000)
+    count_edges(dir + base_edges, 5000000)
+    count_edges(dir + stream_edges, 1000000)
