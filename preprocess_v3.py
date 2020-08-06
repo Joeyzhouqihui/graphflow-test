@@ -48,8 +48,8 @@ clause_gen = Clause_generator()
 var_gen = Variable_generator()
 
 #match 语句所需的点的label和边的label
-required_node_labels = set()
-required_edge_types = set()
+required_node_labels = {}
+required_edge_types = {}
 
 '''
 (:organisation)-[:isLocatedIn]->(:place), (:place)-[isPartOf]->(:place);
@@ -92,11 +92,11 @@ def count_edges(base_file):
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
             edge_type = alter_type(edge_type)
-            if edge_type in required_edge_types:
+            if edge_type in required_edge_types.keys():
                 count += 1
             line = f.readline()
         f.close()
-    print(count)
+    print("edges : ", count)
 
 myset = set()
 def get_edge_types(base_file, num):
@@ -206,10 +206,12 @@ def generate_match_command_v2(query_file, save_file, num = None):
                 to_id = var_gen.get_variable()
                 edge_type = alter_type(edge_type)
                 clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
-                required_node_labels.add(from_type)
-                required_node_labels.add(to_type)
-                required_edge_types.add(edge_type)
+                required_node_labels[from_type] = None
+                required_node_labels[to_type] = None
+                required_edge_types[edge_type] = None
             save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
+        print("required edges : ", list(required_edge_types))
+        print("required nodes : ", list(required_node_labels))
     f.close()
 
 if __name__ == '__main__' :
