@@ -85,18 +85,39 @@ def choose_edges(base_file, base_num, stream_file, stream_num):
             line = f.readline()
         f.close()
 
-def count_edges(base_file):
+def count_nodes(base_file):
+    with open(base_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            id, label = list(pattern.findall(line))
+            if id in dict.keys():
+                label = alter_type(label)
+                clause_gen.add_vertex(id, label)
+                count += 1
+                dict[id] = label
+            line = f.readline()
+        if count > 0:
+            clause = clause_gen.create_vertex()
+    f.close()
+
+labels = set()
+def count_edges(base_file, rate = 0.001):
     with open(base_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
             edge_type = alter_type(edge_type)
-            if edge_type in required_edge_types.keys():
+            seed = random.random()
+            #if edge_type in required_edge_types.keys():
+            if seed < rate:
                 count += 1
+            labels.add(edge_type)
             line = f.readline()
         f.close()
     print("edges : ", count)
+    print("labels : ", list(labels))
 
 myset = set()
 def get_edge_types(base_file, num):
