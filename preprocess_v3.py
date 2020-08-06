@@ -48,8 +48,8 @@ clause_gen = Clause_generator()
 var_gen = Variable_generator()
 
 #match 语句所需的点的label和边的label
-required_node_labels = []
-required_edge_types = []
+required_node_labels = set()
+required_edge_types = set()
 
 '''
 (:organisation)-[:isLocatedIn]->(:place), (:place)-[isPartOf]->(:place);
@@ -181,16 +181,18 @@ def generate_create_edge_commands(edge_file, save_file, num, bz = 100):
 
 def match_preprocess_command(save_file):
     start_id = 0
-    size = len(required_node_labels)
-    for label in required_node_labels:
+    node_labels = list(required_node_labels)
+    edge_types = list(required_edge_types)
+    size = len(node_labels)
+    for label in node_labels:
         clause_gen.add_vertex(start_id, label)
         start_id += 1
         clause = clause_gen.create_vertex()
         save_file.write(clause + '\n')
-    for type in required_edge_types:
-        clause_gen.add_edge(start_id, required_node_labels[start_id%size],
+    for type in edge_types:
+        clause_gen.add_edge(start_id, node_labels[start_id%size],
                             type,
-                            start_id + 1, required_node_labels[(start_id+1)%size])
+                            start_id + 1, node_labels[(start_id+1)%size])
         start_id += 2
         clause = clause_gen.create_edge()
         save_file.write(clause + '\n')
@@ -243,9 +245,9 @@ def generate_match_command_v2(query_file, save_file, num = None):
                 to_id = var_gen.get_variable()
                 edge_type = alter_type(edge_type)
                 clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
-                required_node_labels.append(from_type)
-                required_node_labels.append(to_type)
-                required_edge_types.append(edge_type)
+                required_node_labels.add(from_type)
+                required_node_labels.add(to_type)
+                required_edge_types.add(edge_type)
             save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
         print("required edges : ", required_edge_types)
         print("required nodes : ", required_node_labels)
@@ -284,4 +286,3 @@ if __name__ == '__main__' :
     generate_match_command_v2(dir + query, match_file, num=1000)
     match_preprocess_command(match_file)
     match_file.close()
-    
