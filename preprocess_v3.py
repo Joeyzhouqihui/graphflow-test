@@ -285,6 +285,7 @@ if __name__ == '__main__' :
     stream_num2 = 50000
 
     get_required_labels_and_types_for_match(dir + query, 1000)
+    choose_edges_v2(dir + base_edges, base_num1, base_num2, dir + stream_edges, stream_num1, stream_num2)
     count_nodes(dir + nodes)
     '''
     #base graph
