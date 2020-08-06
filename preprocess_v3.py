@@ -119,6 +119,18 @@ def choose_edges_v2(base_file, base_num1, base_num2, stream_file, stream_num1, s
             line = f.readline()
         f.close()
 
+def count_nodes(node_file):
+    with open(node_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count = 0
+        while line:
+            id, label = list(pattern.findall(line))
+            if id in dict.keys():
+                count += 1
+            line = f.readline()
+    f.close()
+    print("node num : ", count)
+
 def generate_create_vertex_commands(node_file, save_file, bz = 100):
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
@@ -273,7 +285,8 @@ if __name__ == '__main__' :
     stream_num2 = 50000
 
     get_required_labels_and_types_for_match(dir + query, 1000)
-
+    count_nodes(dir + nodes)
+    '''
     #base graph
     base_file = open(base_command_file, 'w', encoding='utf-8')
     choose_edges_v2(dir + base_edges, base_num1, base_num2, dir + stream_edges, stream_num1, stream_num2)
@@ -301,3 +314,6 @@ if __name__ == '__main__' :
         generate_create_edge_commands_v2(dir + stream_edges, stream_file, num1=stream_num1, num2=stream_num2, bz=bz)
         stream_file.close()
     print('finish stream edge !')
+    '''
+
+
