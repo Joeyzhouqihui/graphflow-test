@@ -85,55 +85,39 @@ def choose_edges(base_file, base_num, stream_file, stream_num):
             line = f.readline()
         f.close()
 
-def count_nodes(base_file):
+def choose_edges_v2(base_file, base_num1, base_num2, stream_file, stream_num1, stream_num2):
     with open(base_file, 'r', encoding='utf-8') as f:
         line = f.readline()
-        count = 0
-        while line:
-            id, label = list(pattern.findall(line))
-            if id in dict.keys():
-                label = alter_type(label)
-                if label in required_node_labels:
-                    count += 1
-            line = f.readline()
-    f.close()
-
-labels = set()
-def count_edges(base_file, num = 100000):
-    with open(base_file, 'r', encoding='utf-8') as f:
-        line = f.readline()
-        count = 0
+        count1 = 0
+        count2 = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
-            edge_type = alter_type(edge_type)
             if edge_type in required_edge_types:
-                count += 1
-                labels.add(edge_type)
-            else:
-                seed = random.random()
-                if seed < 0.001:
-                    labels.add(edge_type)
-                    count += 1
-            if count >= num: break
+                if count2 < base_num2:
+                    count2 += 1
+            elif count1 < base_num1:
+                count1 += 1
+            else: break
+            dict[from_id] = None
+            dict[to_id] = None
             line = f.readline()
         f.close()
-    print("edges : ", count)
-    print("labels : ", list(labels))
-
-myset = set()
-def get_edge_types(base_file, num):
-    with open(base_file, 'r', encoding='utf-8') as f:
+    with open(stream_file, 'r', encoding='utf-8') as f:
         line = f.readline()
-        count = 0
+        count1 = 0
+        count2 = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
-            myset.add(edge_type)
-            count += 1
-            if count >= num:
-                break
+            if edge_type in required_edge_types:
+                if count2 < stream_num2:
+                    count2 += 1
+            elif count1 < stream_num1:
+                count1 += 1
+            else: break
+            dict[from_id] = None
+            dict[to_id] = None
             line = f.readline()
         f.close()
-    print(list(myset))
 
 def generate_create_vertex_commands(node_file, save_file, bz = 100):
     with open(node_file, 'r', encoding='utf-8') as f:
@@ -176,6 +160,35 @@ def generate_create_edge_commands(edge_file, save_file, num, bz = 100):
             else: break
             line = f.readline()
             edge_count += 1
+        if count > 0:
+            clause = clause_gen.create_edge()
+            save_file.write(clause + '\n')
+    f.close()
+
+def generate_create_edge_commands_v2(edge_file, save_file, num1, num2, bz = 100):
+    with open(edge_file, 'r', encoding='utf-8') as f:
+        line = f.readline()
+        count1 = 0
+        count2 = 0
+        count = 0
+        while line:
+            from_id, edge_type, to_id = list(pattern.findall(line))
+            if edge_type in required_edge_types:
+                if count2 < num2:
+                    count2 += 1
+            elif count1 < num1:
+                count1 += 1
+            else: break
+            from_type =  dict[from_id]
+            to_type = dict[to_id]
+            edge_type = alter_type(edge_type)
+            clause_gen.add_edge(from_id, from_type, edge_type, to_id, to_type)
+            count += 1
+            if count >= bz:
+                clause = clause_gen.create_edge()
+                save_file.write(clause + '\n')
+                count = 0
+            line = f.readline()
         if count > 0:
             clause = clause_gen.create_edge()
             save_file.write(clause + '\n')
@@ -254,14 +267,22 @@ def get_required_labels_and_types_for_match(query_file, num = None):
     f.close()
 
 if __name__ == '__main__' :
-    '''
+    base_num1 = 250000
+    base_num2 = 250000
+    stream_num1 = 50000
+    stream_num2 = 50000
+
+    get_required_labels_and_types_for_match(dir + query, 1000)
+
     #base graph
     base_file = open(base_command_file, 'w', encoding='utf-8')
-    choose_edges(dir + base_edges, 500000, dir + stream_edges, 100000)
+    choose_edges_v2(dir + base_edges, base_num1, base_num2, dir + stream_edges, stream_num1, stream_num2)
     generate_create_vertex_commands(dir + nodes, base_file, bz=100)
     print('finish nodes !')
-    generate_create_edge_commands(dir + base_edges, base_file, num=500000, bz=100)
+    generate_create_edge_commands_v2(dir + base_edges, base_file, num1=base_num1, num2=base_num2, bz=100)
     print('finish base edge !')
+    match_preprocess_command(base_file)
+    print('finish preparing for continuously matching !')
     base_file.write(save_clause + '\n')
     base_file.close()
 
@@ -277,11 +298,6 @@ if __name__ == '__main__' :
     #stream graph
     for bz in bzs:
         stream_file = open(stream_command_file.format(bz), 'w', encoding='utf-8')
-        generate_create_edge_commands(dir + stream_edges, stream_file, num=100000, bz=bz)
+        generate_create_edge_commands_v2(dir + stream_edges, stream_file, num1=stream_num1, num2=stream_num2, bz=bz)
         stream_file.close()
     print('finish stream edge !')
-    '''
-
-    get_required_labels_and_types_for_match(dir + query, 1000)
-    count_edges(dir + base_edges, 5000000)
-    count_edges(dir + stream_edges, 1000000)
