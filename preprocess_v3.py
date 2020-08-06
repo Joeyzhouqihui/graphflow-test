@@ -99,20 +99,19 @@ def count_nodes(base_file):
     f.close()
 
 labels = set()
-def count_edges(base_file, rate = 0.01):
+def count_edges(base_file, num = 100000):
     with open(base_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
+        count2 = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
             edge_type = alter_type(edge_type)
-            if edge_type in required_edge_types.keys():
-                seed = random.random()
-                if seed < rate:
-                    count += 1
-                    labels.add(edge_type)
-                    dict[from_id] = None
-                    dict[to_id] = None
+            if edge_type in required_edge_types:
+                count += 1
+                labels.add(edge_type)
+            count2 += 1
+            if count2 >= num: break
             line = f.readline()
         f.close()
     print("edges : ", count)
@@ -281,7 +280,5 @@ if __name__ == '__main__' :
     '''
 
     get_required_labels_and_types_for_match(dir + query, 1000)
-    match_file = open("command/match_command_test.txt", 'w', encoding='utf-8')
-    match_preprocess_command(match_file)
-    generate_match_command(dir + query, match_file, num=1000)
-    match_file.close()
+    count_edges(dir + base_edges, 500000)
+    count_edges(dir + stream_edges, 100000)
