@@ -102,18 +102,18 @@ def count_nodes(base_file):
     f.close()
 
 labels = set()
-def count_edges(base_file, rate = 0.001):
+def count_edges(base_file, rate = 0.01):
     with open(base_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
         while line:
             from_id, edge_type, to_id = list(pattern.findall(line))
             edge_type = alter_type(edge_type)
-            seed = random.random()
-            #if edge_type in required_edge_types.keys():
-            if seed < rate:
-                count += 1
-            labels.add(edge_type)
+            if edge_type in required_edge_types.keys():
+                seed = random.random()
+                if seed < rate:
+                    count += 1
+                    labels.add(edge_type)
             line = f.readline()
         f.close()
     print("edges : ", count)
