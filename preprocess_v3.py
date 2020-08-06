@@ -48,8 +48,8 @@ clause_gen = Clause_generator()
 var_gen = Variable_generator()
 
 #match 语句所需的点的label和边的label
-required_node_labels = {}
-required_edge_types = {}
+required_node_labels = []
+required_edge_types = []
 
 '''
 (:organisation)-[:isLocatedIn]->(:place), (:place)-[isPartOf]->(:place);
@@ -93,12 +93,9 @@ def count_nodes(base_file):
             id, label = list(pattern.findall(line))
             if id in dict.keys():
                 label = alter_type(label)
-                clause_gen.add_vertex(id, label)
-                count += 1
-                dict[id] = label
+                if label in required_node_labels:
+                    count += 1
             line = f.readline()
-        if count > 0:
-            clause = clause_gen.create_vertex()
     f.close()
 
 labels = set()
@@ -114,6 +111,8 @@ def count_edges(base_file, rate = 0.01):
                 if seed < rate:
                     count += 1
                     labels.add(edge_type)
+                    dict[from_id] = None
+                    dict[to_id] = None
             line = f.readline()
         f.close()
     print("edges : ", count)
@@ -180,6 +179,23 @@ def generate_create_edge_commands(edge_file, save_file, num, bz = 100):
             save_file.write(clause + '\n')
     f.close()
 
+def match_preprocess_command(save_file):
+    start_id = 0
+    size = len(required_node_labels)
+    for label in required_node_labels:
+        clause_gen.add_vertex(start_id, label)
+        start_id += 1
+        clause = clause_gen.create_vertex()
+        save_file.write(clause + '\n')
+    for type in required_edge_types:
+        clause_gen.add_edge(start_id, required_node_labels[start_id%size],
+                            type,
+                            start_id + 1, required_node_labels[(start_id+1)%size])
+        start_id += 2
+        clause = clause_gen.create_edge()
+        save_file.write(clause + '\n')
+
+
 def generate_match_command(query_file, save_file, num = None):
     with open(query_file, 'r', encoding='utf-8') as f:
         line = f.readline()
@@ -227,12 +243,12 @@ def generate_match_command_v2(query_file, save_file, num = None):
                 to_id = var_gen.get_variable()
                 edge_type = alter_type(edge_type)
                 clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
-                required_node_labels[from_type] = None
-                required_node_labels[to_type] = None
-                required_edge_types[edge_type] = None
+                required_node_labels.append(from_type)
+                required_node_labels.append(to_type)
+                required_edge_types.append(edge_type)
             save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
-        print("required edges : ", list(required_edge_types))
-        print("required nodes : ", list(required_node_labels))
+        print("required edges : ", required_edge_types)
+        print("required nodes : ", required_node_labels)
     f.close()
 
 if __name__ == '__main__' :
@@ -266,5 +282,6 @@ if __name__ == '__main__' :
 
     match_file = open("command/match_command_test.txt", 'w', encoding='utf-8')
     generate_match_command_v2(dir + query, match_file, num=1000)
-    count_edges(dir + base_edges)
-    count_edges(dir + stream_edges)
+    match_preprocess_command(match_file)
+    match_file.close()
+    
