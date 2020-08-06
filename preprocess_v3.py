@@ -208,16 +208,18 @@ def generate_match_command(query_file, save_file, num = None):
             line = f.readline()
             node_num, edge_num = list(map(int, pattern.findall(line)))
             node_types = []
+            node_ids = []
             for j in range(0, node_num):
                 line = f.readline()
                 node_types.append(pattern.findall(line)[0])
+                node_ids.append(var_gen.get_variable())
             for j in range(0, edge_num):
                 line = f.readline()
                 from_id, to_id, edge_type = list(pattern.findall(line))
                 from_type = alter_type(node_types[int(from_id)])
                 to_type = alter_type(node_types[int(to_id)])
-                from_id = var_gen.get_variable()
-                to_id = var_gen.get_variable()
+                from_id = node_ids[int(from_id)]
+                to_id = node_ids[int(to_id)]
                 edge_type = alter_type(edge_type)
                 clause_gen.add_match_edge(from_id, from_type, edge_type, to_id, to_type)
             save_file.write(clause_gen.create_continuous_edge("result.txt")+'\n')
@@ -241,8 +243,6 @@ def get_required_labels_and_types_for_match(query_file, num = None):
                 from_id, to_id, edge_type = list(pattern.findall(line))
                 from_type = alter_type(node_types[int(from_id)])
                 to_type = alter_type(node_types[int(to_id)])
-                from_id = var_gen.get_variable()
-                to_id = var_gen.get_variable()
                 edge_type = alter_type(edge_type)
                 required_node_labels.add(from_type)
                 required_node_labels.add(to_type)
