@@ -95,11 +95,13 @@ def choose_edges_v2(base_file, base_num1, base_num2, stream_file, stream_num1, s
             if edge_type in required_edge_types:
                 if count2 < base_num2:
                     count2 += 1
+                    dict[from_id] = None
+                    dict[to_id] = None
             elif count1 < base_num1:
                 count1 += 1
-            else: break
-            dict[from_id] = None
-            dict[to_id] = None
+                dict[from_id] = None
+                dict[to_id] = None
+            if count1 >= base_num1 and count2 >= base_num2: break
             line = f.readline()
         f.close()
     with open(stream_file, 'r', encoding='utf-8') as f:
@@ -111,11 +113,13 @@ def choose_edges_v2(base_file, base_num1, base_num2, stream_file, stream_num1, s
             if edge_type in required_edge_types:
                 if count2 < stream_num2:
                     count2 += 1
+                    dict[from_id] = None
+                    dict[to_id] = None
             elif count1 < stream_num1:
                 count1 += 1
-            else: break
-            dict[from_id] = None
-            dict[to_id] = None
+                dict[from_id] = None
+                dict[to_id] = None
+            if count1 >= stream_num1 and count2 >= stream_num2: break
             line = f.readline()
         f.close()
 
@@ -188,18 +192,23 @@ def generate_create_edge_commands_v2(edge_file, save_file, num1, num2, bz = 100)
             if edge_type in required_edge_types:
                 if count2 < num2:
                     count2 += 1
+                    from_type = dict[from_id]
+                    to_type = dict[to_id]
+                    edge_type = alter_type(edge_type)
+                    clause_gen.add_edge(from_id, from_type, edge_type, to_id, to_type)
+                    count += 1
             elif count1 < num1:
                 count1 += 1
-            else: break
-            from_type =  dict[from_id]
-            to_type = dict[to_id]
-            edge_type = alter_type(edge_type)
-            clause_gen.add_edge(from_id, from_type, edge_type, to_id, to_type)
-            count += 1
+                from_type = dict[from_id]
+                to_type = dict[to_id]
+                edge_type = alter_type(edge_type)
+                clause_gen.add_edge(from_id, from_type, edge_type, to_id, to_type)
+                count += 1
             if count >= bz:
                 clause = clause_gen.create_edge()
                 save_file.write(clause + '\n')
                 count = 0
+            if count1 >= num1 and count2 >= num2: break
             line = f.readline()
         if count > 0:
             clause = clause_gen.create_edge()
@@ -284,10 +293,6 @@ if __name__ == '__main__' :
     stream_num1 = 50000
     stream_num2 = 50000
 
-    get_required_labels_and_types_for_match(dir + query, 1000)
-    choose_edges_v2(dir + base_edges, base_num1, base_num2, dir + stream_edges, stream_num1, stream_num2)
-    count_nodes(dir + nodes)
-    '''
     #base graph
     base_file = open(base_command_file, 'w', encoding='utf-8')
     choose_edges_v2(dir + base_edges, base_num1, base_num2, dir + stream_edges, stream_num1, stream_num2)
@@ -315,6 +320,5 @@ if __name__ == '__main__' :
         generate_create_edge_commands_v2(dir + stream_edges, stream_file, num1=stream_num1, num2=stream_num2, bz=bz)
         stream_file.close()
     print('finish stream edge !')
-    '''
 
 
