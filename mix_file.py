@@ -1,8 +1,9 @@
-file1 = open("stream_command_bz_10.txt", "r", encoding="utf-8")
-file2 = open("stream_command_bz_100.txt", "r", encoding="utf-8")
-file3 = open("stream_command_bz_1000.txt", "r", encoding="utf-8")
+dir = "command_old/"
+file1 = open(dir+"stream_command_bz_10.txt", "r", encoding="utf-8")
+file2 = open(dir+"stream_command_bz_100.txt", "r", encoding="utf-8")
+file3 = open(dir+"stream_command_bz_1000.txt", "r", encoding="utf-8")
 
-file4 = open("stream_command_bz_mixed.txt", "w", encoding="utf-8")
+file4 = open(dir+"stream_command_bz_mixed.txt", "w", encoding="utf-8")
 
 num1 = 200
 skip2 = 20
