@@ -136,6 +136,7 @@ def count_nodes(node_file):
     print("node num : ", count)
 
 def generate_create_vertex_commands(node_file, save_file, bz = 100):
+    nodes = 0
     with open(node_file, 'r', encoding='utf-8') as f:
         line = f.readline()
         count = 0
@@ -145,6 +146,7 @@ def generate_create_vertex_commands(node_file, save_file, bz = 100):
                 label = alter_type(label)
                 clause_gen.add_vertex(id, label)
                 count += 1
+                nodes += 1
                 if count >= bz:
                     clause = clause_gen.create_vertex()
                     save_file.write(clause + '\n')
@@ -155,6 +157,7 @@ def generate_create_vertex_commands(node_file, save_file, bz = 100):
             clause = clause_gen.create_vertex()
             save_file.write(clause + '\n')
     f.close()
+    print("nodes num : ", nodes)
 
 def generate_create_edge_commands(edge_file, save_file, num, bz = 100):
     with open(edge_file, 'r', encoding='utf-8') as f:
