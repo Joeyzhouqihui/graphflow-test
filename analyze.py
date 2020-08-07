@@ -2,7 +2,7 @@ import numpy as np
 
 triggers = [10, 100, 1000]
 bzs = [10, 100, 1000]
-dir = "command_old/"
+dir = "result/"
 for trigger in triggers:
     for bz in bzs:
         filename = str(trigger) + "_" + str(bz) + ".txt"
