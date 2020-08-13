@@ -292,10 +292,10 @@ def get_required_labels_and_types_for_match(query_file, num = None):
 
 
 if __name__ == '__main__' :
-    base_num1 = 500000
-    base_num2 = 500000
-    stream_num1 = 100000
-    stream_num2 = 100000
+    base_num1 = 5000000
+    base_num2 = 5000000
+    stream_num1 = 500000
+    stream_num2 = 500000
 
     #base graph
     base_file = open(base_command_file, 'w', encoding='utf-8')
@@ -304,6 +304,7 @@ if __name__ == '__main__' :
     print('finish nodes !')
     generate_create_edge_commands_v2(dir + base_edges, base_file, num1=base_num1, num2=base_num2, bz=100)
     print('finish base edge !')
+    get_required_labels_and_types_for_match(dir + query, num=1000)
     match_preprocess_command(base_file)
     print('finish preparing for continuously matching !')
     base_file.write(save_clause + '\n')
