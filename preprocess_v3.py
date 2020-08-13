@@ -290,11 +290,12 @@ def get_required_labels_and_types_for_match(query_file, num = None):
         print("required nodes : ", required_node_labels)
     f.close()
 
+
 if __name__ == '__main__' :
-    base_num1 = 250000
-    base_num2 = 250000
-    stream_num1 = 50000
-    stream_num2 = 50000
+    base_num1 = 500000
+    base_num2 = 500000
+    stream_num1 = 100000
+    stream_num2 = 100000
 
     #base graph
     base_file = open(base_command_file, 'w', encoding='utf-8')
