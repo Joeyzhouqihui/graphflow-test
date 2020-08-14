@@ -4,7 +4,7 @@ triggers = [10, 100, 1000]
 bzs = [10, 100, 1000]
 dir = "result/"
 
-'''
+
 for trigger in triggers:
     for bz in bzs:
         filename = str(trigger) + "_" + str(bz) + ".txt"
@@ -17,8 +17,9 @@ for trigger in triggers:
                 count += 1
                 line = f.readline()
         print(filename, " : ", sum/count)
-'''
 
+
+'''
 num1 = 200
 num2 = 20
 num3 = 5
@@ -35,7 +36,6 @@ with open('mix.txt', 'r', encoding='utf-8') as f:
     for i in range(num3):
         line = f.readline()
         sum3 += float(line.strip())
-
-
+'''
 
 
